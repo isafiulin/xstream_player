@@ -3,21 +3,7 @@ import 'package:equatable/equatable.dart';
 enum TrackType { audio, video, subtitle, unknown }
 
 class BetterPlayerTrack extends Equatable {
-  final TrackType type;
-  final String? id;
-  final String? mime;
-  final String? language;
-  final String? label;
-  final String? groupId;
-  final double? frameRate;
-  final String? audioGroupId;
-  final int? groupIndex;
-  final bool? isSupported;
-  final int width;
-  final int height;
-  final int bitrate;
-
-  BetterPlayerTrack({
+  const BetterPlayerTrack({
     required this.type,
     required this.width,
     required this.height,
@@ -32,33 +18,18 @@ class BetterPlayerTrack extends Equatable {
     this.language,
     this.label,
   });
-
-  @override
-  List<Object?> get props => [
-        type,
-        groupId,
-        id,
-        mime,
-        language,
-        label,
-        width,
-        height,
-        bitrate,
-        frameRate,
-        isSupported,
-        audioGroupId
-      ];
-  factory BetterPlayerTrack.defaultTrack() {
-    return BetterPlayerTrack(
-        type: TrackType.unknown,
-        width: -1,
-        height: -1,
-        bitrate: -1,
-        frameRate: -1,
-        isSupported: true);
-  }
+  factory BetterPlayerTrack.defaultTrack() => const BetterPlayerTrack(
+    type: TrackType.unknown,
+    width: -1,
+    height: -1,
+    bitrate: -1,
+    frameRate: -1,
+    isSupported: true,
+  );
   factory BetterPlayerTrack.fromJson(Map<dynamic, dynamic> json) {
-    if (json.isEmpty) return BetterPlayerTrack.defaultTrack();
+    if (json.isEmpty) {
+      return BetterPlayerTrack.defaultTrack();
+    }
     return BetterPlayerTrack(
       type: typeFromString(json['type']),
       groupId: json['groupId'],
@@ -75,6 +46,35 @@ class BetterPlayerTrack extends Equatable {
       audioGroupId: json['audioGroupId'],
     );
   }
+  final TrackType type;
+  final String? id;
+  final String? mime;
+  final String? language;
+  final String? label;
+  final String? groupId;
+  final double? frameRate;
+  final String? audioGroupId;
+  final int? groupIndex;
+  final bool? isSupported;
+  final int width;
+  final int height;
+  final int bitrate;
+
+  @override
+  List<Object?> get props => [
+    type,
+    groupId,
+    id,
+    mime,
+    language,
+    label,
+    width,
+    height,
+    bitrate,
+    frameRate,
+    isSupported,
+    audioGroupId,
+  ];
 
   static List<BetterPlayerTrack> tracksFromJson(List<dynamic> json) {
     return json.map((e) => BetterPlayerTrack.fromJson(e)).toList();

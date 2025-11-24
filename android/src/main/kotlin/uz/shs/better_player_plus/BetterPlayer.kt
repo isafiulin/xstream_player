@@ -19,10 +19,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.Surface
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.lifecycle.Observer
-import androidx.media3.extractor.DefaultExtractorsFactory
-import io.flutter.plugin.common.EventChannel.EventSink
-import androidx.work.Data
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingPlayer
@@ -79,9 +77,7 @@ import java.io.File
 import java.util.UUID
 import kotlin.math.max
 import kotlin.math.min
-import androidx.core.net.toUri
 
-@UnstableApi
 @UnstableApi
 internal class BetterPlayer(
     context: Context,
@@ -165,27 +161,23 @@ internal class BetterPlayer(
             }
             val drmSchemeUuid = Util.getDrmUuid("widevine")
             if (drmSchemeUuid != null) {
-                drmSessionManager = DefaultDrmSessionManager.Builder()
-                    .setUuidAndExoMediaDrmProvider(
-                        drmSchemeUuid
-                    ) { uuid: UUID? ->
-                        try {
-                            val mediaDrm = FrameworkMediaDrm.newInstance(uuid!!)
-                            // Force L3.
-                            mediaDrm.setPropertyString("securityLevel", "L3")
-                            return@setUuidAndExoMediaDrmProvider mediaDrm
-                        } catch (_: UnsupportedDrmException) {
-                            return@setUuidAndExoMediaDrmProvider DummyExoMediaDrm()
-                        }
-                    }
-                    .setMultiSession(false)
-                    .build(httpMediaDrmCallback)
+                drmSessionManager =
+                    DefaultDrmSessionManager.Builder().setUuidAndExoMediaDrmProvider(
+                            drmSchemeUuid
+                        ) { uuid: UUID? ->
+                            try {
+                                val mediaDrm = FrameworkMediaDrm.newInstance(uuid!!)
+                                // Force L3.
+                                mediaDrm.setPropertyString("securityLevel", "L3")
+                                return@setUuidAndExoMediaDrmProvider mediaDrm
+                            } catch (_: UnsupportedDrmException) {
+                                return@setUuidAndExoMediaDrmProvider DummyExoMediaDrm()
+                            }
+                        }.setMultiSession(false).build(httpMediaDrmCallback)
             }
         } else if (!clearKey.isNullOrEmpty()) {
-            DefaultDrmSessionManager.Builder()
-                .setUuidAndExoMediaDrmProvider(
-                    C.CLEARKEY_UUID,
-                    FrameworkMediaDrm.DEFAULT_PROVIDER
+            DefaultDrmSessionManager.Builder().setUuidAndExoMediaDrmProvider(
+                    C.CLEARKEY_UUID, FrameworkMediaDrm.DEFAULT_PROVIDER
                 ).build(LocalMediaDrmCallback(clearKey.toByteArray()))
         } else {
             drmSessionManager = null
@@ -204,10 +196,8 @@ internal class BetterPlayer(
         }
         val mediaSource = buildMediaSource(uri, dataSourceFactory, formatHint, cacheKey, context)
         if (overriddenDuration != 0L) {
-            val clippingMediaSource = ClippingMediaSource.Builder(mediaSource)
-                .setStartPositionMs(0)
-                .setEndPositionMs(overriddenDuration * 1000)
-                .build()
+            val clippingMediaSource = ClippingMediaSource.Builder(mediaSource).setStartPositionMs(0)
+                .setEndPositionMs(overriddenDuration * 1000).build()
             exoPlayer?.setMediaSource(clippingMediaSource)
         } else {
             exoPlayer?.setMediaSource(mediaSource)
@@ -399,9 +389,10 @@ internal class BetterPlayer(
             mediaItemBuilder.setCustomCacheKey(cacheKey)
         }
         val mediaItem = mediaItemBuilder.build()
-        val drmSessionManagerProvider: DrmSessionManagerProvider? = drmSessionManager?.let { drmSessionManager ->
-            DrmSessionManagerProvider { drmSessionManager }
-        }
+        val drmSessionManagerProvider: DrmSessionManagerProvider? =
+            drmSessionManager?.let { drmSessionManager ->
+                DrmSessionManagerProvider { drmSessionManager }
+            }
 
         return when (type) {
             C.CONTENT_TYPE_SS -> SsMediaSource.Factory(
@@ -422,8 +413,7 @@ internal class BetterPlayer(
                 }
             }.createMediaSource(mediaItem)
 
-            C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(mediaDataSourceFactory)
-                .apply {
+            C.CONTENT_TYPE_HLS -> HlsMediaSource.Factory(mediaDataSourceFactory).apply {
                     if (drmSessionManagerProvider != null) {
                         setDrmSessionManagerProvider(drmSessionManagerProvider)
                     }
@@ -592,9 +582,7 @@ internal class BetterPlayer(
 
     private fun setAudioAttributes(exoPlayer: ExoPlayer?, mixWithOthers: Boolean) {
         exoPlayer?.setAudioAttributes(
-            AudioAttributes.Builder()
-                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                .build(),
+            AudioAttributes.Builder().setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(),
             !mixWithOthers
         )
     }
@@ -828,12 +816,12 @@ internal class BetterPlayer(
                         )
                     )
 
-                trackSelector.setParameters(builder)
-            } else {
-                Log.e(TAG, "setAudioTrack: groupIndex out of bounds: $groupIndex")
-            }
+            trackSelector.setParameters(builder)
+        } else {
+            Log.e(TAG, "setAudioTrack: groupIndex out of bounds: $groupIndex")
         }
     }
+
 
     private fun sendSeekToEvent(positionMs: Long) {
         exoPlayer?.seekTo(positionMs)
@@ -951,5 +939,4 @@ internal class BetterPlayer(
             result.success(null)
         }
     }
-
 }

@@ -30,9 +30,7 @@ class _ControllerControlsPageState extends State<ControllerControlsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Controller controls"),
-      ),
+      appBar: AppBar(title: Text("Controller controls")),
       body: Column(
         children: [
           const SizedBox(height: 8),
@@ -44,14 +42,11 @@ class _ControllerControlsPageState extends State<ControllerControlsPage> {
               style: TextStyle(fontSize: 16),
             ),
           ),
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: BetterPlayer(controller: _betterPlayerController),
-          ),
+          AspectRatio(aspectRatio: 16 / 9, child: BetterPlayer(controller: _betterPlayerController)),
           Wrap(
             children: [
-              TextButton(child: Text("Play"), onPressed: _betterPlayerController.play),
-              TextButton(child: Text("Pause"), onPressed: _betterPlayerController.pause),
+              TextButton(onPressed: _betterPlayerController.play, child: Text("Play")),
+              TextButton(onPressed: _betterPlayerController.pause, child: Text("Pause")),
               TextButton(
                 child: Text("Hide controls"),
                 onPressed: () {
@@ -65,7 +60,7 @@ class _ControllerControlsPageState extends State<ControllerControlsPage> {
                 },
               ),
             ],
-          )
+          ),
         ],
       ),
     );

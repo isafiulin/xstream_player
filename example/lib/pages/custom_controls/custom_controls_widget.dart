@@ -36,12 +36,14 @@ class _CustomControlsWidgetState extends State<CustomControlsWidget> {
                     ),
                   ),
                 ),
-                onTap: () => setState(() {
-                  if (widget.controller!.isFullScreen)
-                    widget.controller!.exitFullScreen();
-                  else
-                    widget.controller!.enterFullScreen();
-                }),
+                onTap:
+                    () => setState(() {
+                      if (widget.controller!.isFullScreen) {
+                        widget.controller!.exitFullScreen();
+                      } else {
+                        widget.controller!.enterFullScreen();
+                      }
+                    }),
               ),
             ),
           ),
@@ -75,18 +77,16 @@ class _CustomControlsWidgetState extends State<CustomControlsWidget> {
                             }
                           });
                         },
-                        child: Icon(
-                          Icons.fast_rewind,
-                          color: Colors.white,
-                        ),
+                        child: Icon(Icons.fast_rewind, color: Colors.white),
                       ),
                       InkWell(
                         onTap: () {
                           setState(() {
-                            if (widget.controller!.isPlaying()!)
+                            if (widget.controller!.isPlaying()!) {
                               widget.controller!.pause();
-                            else
+                            } else {
                               widget.controller!.play();
+                            }
                           });
                         },
                         child: Icon(
@@ -109,10 +109,7 @@ class _CustomControlsWidgetState extends State<CustomControlsWidget> {
                             }
                           });
                         },
-                        child: Icon(
-                          Icons.fast_forward,
-                          color: Colors.white,
-                        ),
+                        child: Icon(Icons.fast_forward, color: Colors.white),
                       ),
                     ],
                   ),

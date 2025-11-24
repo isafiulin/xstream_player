@@ -42,6 +42,7 @@ class _VideoListWidgetState extends State<VideoListWidget> {
             ),
           ),
           AspectRatio(
+              aspectRatio: 1,
               child: BetterPlayerListVideoPlayer(
                 BetterPlayerDataSource(
                   BetterPlayerDataSourceType.network,
@@ -58,8 +59,7 @@ class _VideoListWidgetState extends State<VideoListWidget> {
                 //key: Key(videoListData.hashCode.toString()),
                 playFraction: 0.8,
                 betterPlayerListVideoPlayerController: controller,
-              ),
-              aspectRatio: 1),
+              )),
           Padding(
             padding: EdgeInsets.all(8),
             child: Text("Horror: In Steven Spielberg's Jaws, a shark terrorizes a beach "

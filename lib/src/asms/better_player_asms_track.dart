@@ -2,6 +2,19 @@ import 'package:equatable/equatable.dart';
 
 /// Represents HLS / DASH track which can be played within player
 class BetterPlayerAsmsTrack extends Equatable {
+  const BetterPlayerAsmsTrack(
+    this.id,
+    this.width,
+    this.height,
+    this.bitrate,
+    this.frameRate,
+    this.codecs,
+    this.mimeType,
+    this.audioGroupId,
+  );
+
+  factory BetterPlayerAsmsTrack.defaultTrack() => const BetterPlayerAsmsTrack('', 0, 0, 0, 0, '', '', '');
+
   ///Id of the track
   final String? id;
 
@@ -26,22 +39,6 @@ class BetterPlayerAsmsTrack extends Equatable {
   ///audio group id of the video track
   final String? audioGroupId;
 
-  BetterPlayerAsmsTrack(
-    this.id,
-    this.width,
-    this.height,
-    this.bitrate,
-    this.frameRate,
-    this.codecs,
-    this.mimeType,
-    this.audioGroupId,
-  );
-
-  factory BetterPlayerAsmsTrack.defaultTrack() {
-    return BetterPlayerAsmsTrack('', 0, 0, 0, 0, '', '', '');
-  }
-
   @override
-  List<Object?> get props =>
-      [id, width, height, bitrate, frameRate, codecs, mimeType, audioGroupId];
+  List<Object?> get props => [id, width, height, bitrate, frameRate, codecs, mimeType, audioGroupId];
 }

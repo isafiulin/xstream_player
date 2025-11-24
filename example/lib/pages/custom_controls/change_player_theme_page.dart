@@ -29,9 +29,7 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Change player theme"),
-      ),
+      appBar: AppBar(title: Text("Change player theme")),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -44,9 +42,7 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
                 style: TextStyle(fontSize: 16),
               ),
             ),
-            BetterPlayer(
-              controller: _betterPlayerController,
-            ),
+            BetterPlayer(controller: _betterPlayerController),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -56,12 +52,10 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
                     setState(() {
                       _playerTheme = BetterPlayerTheme.material;
                       _betterPlayerController.pause();
-                      _betterPlayerController = new BetterPlayerController(
+                      _betterPlayerController = BetterPlayerController(
                         BetterPlayerConfiguration(
                           autoDispose: true,
-                          controlsConfiguration: BetterPlayerControlsConfiguration(
-                            playerTheme: _playerTheme,
-                          ),
+                          controlsConfiguration: BetterPlayerControlsConfiguration(playerTheme: _playerTheme),
                         ),
                         betterPlayerDataSource: _dataSource,
                       );
@@ -74,12 +68,10 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
                     setState(() {
                       _playerTheme = BetterPlayerTheme.cupertino;
                       _betterPlayerController.pause();
-                      _betterPlayerController = new BetterPlayerController(
+                      _betterPlayerController = BetterPlayerController(
                         BetterPlayerConfiguration(
                           autoDispose: true,
-                          controlsConfiguration: BetterPlayerControlsConfiguration(
-                            playerTheme: _playerTheme,
-                          ),
+                          controlsConfiguration: BetterPlayerControlsConfiguration(playerTheme: _playerTheme),
                         ),
                         betterPlayerDataSource: _dataSource,
                       );
@@ -92,20 +84,17 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
                     setState(() {
                       _playerTheme = BetterPlayerTheme.custom;
                       _betterPlayerController.pause();
-                      _betterPlayerController = new BetterPlayerController(
+                      _betterPlayerController = BetterPlayerController(
                         BetterPlayerConfiguration(
                           autoDispose: true,
                           controlsConfiguration: BetterPlayerControlsConfiguration(
                             playerTheme: _playerTheme,
-                            customControlsBuilder: (
-                              controller,
-                              onControlsVisibilityChanged,
-                              controlsConfiguration,
-                            ) =>
-                                CustomControlsWidget(
-                              controller: controller,
-                              onControlsVisibilityChanged: onControlsVisibilityChanged,
-                            ),
+                            customControlsBuilder:
+                                (controller, onControlsVisibilityChanged, controlsConfiguration) =>
+                                    CustomControlsWidget(
+                                      controller: controller,
+                                      onControlsVisibilityChanged: onControlsVisibilityChanged,
+                                    ),
                           ),
                         ),
                         betterPlayerDataSource: _dataSource,
@@ -114,7 +103,7 @@ class _ChangePlayerThemePageState extends State<ChangePlayerThemePage> {
                   },
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

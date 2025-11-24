@@ -2,6 +2,16 @@ import 'package:equatable/equatable.dart';
 
 ///Representation of HLS / DASH audio track
 class BetterPlayerAsmsAudioTrack extends Equatable {
+  const BetterPlayerAsmsAudioTrack({
+    this.id,
+    this.segmentAlignment,
+    this.label,
+    this.language,
+    this.url,
+    this.mimeType,
+    this.audioGroupId,
+  });
+
   ///Audio index in DASH xml or Id of track inside HLS playlist
   final int? id;
 
@@ -23,16 +33,6 @@ class BetterPlayerAsmsAudioTrack extends Equatable {
   ///group id
   final String? audioGroupId;
 
-  BetterPlayerAsmsAudioTrack(
-      {this.id,
-      this.segmentAlignment,
-      this.label,
-      this.language,
-      this.url,
-      this.mimeType,
-      this.audioGroupId});
-
   @override
-  List<Object?> get props =>
-      [id, segmentAlignment, label, language, url, mimeType, audioGroupId];
+  List<Object?> get props => [id, segmentAlignment, label, language, url, mimeType, audioGroupId];
 }

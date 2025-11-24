@@ -3,7 +3,7 @@ import 'package:xstream_player/src/video_player/video_player_platform_interface.
 
 class MockVideoPlayerController extends VideoPlayerController {
   MockVideoPlayerController() : super(autoCreate: false) {
-    value = VideoPlayerValue(duration: Duration.zero);
+    value = const VideoPlayerValue(duration: Duration.zero);
   }
 
   bool isLoopingState = false;

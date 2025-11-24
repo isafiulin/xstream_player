@@ -7,11 +7,11 @@ import 'dart:async';
 
 // Flutter imports:
 import 'package:equatable/equatable.dart';
-import 'package:xstream_player/src/configuration/better_player_buffering_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:xstream_player/src/configuration/better_player_buffering_configuration.dart';
 import 'package:xstream_player/src/configuration/better_player_track.dart';
-import 'method_channel_video_player.dart';
+import 'package:xstream_player/src/video_player/method_channel_video_player.dart';
 
 /// The interface that implementations of video_player must implement.
 ///
@@ -29,8 +29,7 @@ abstract class VideoPlayerPlatform {
   @visibleForTesting
   bool get isMock => false;
 
-  static VideoPlayerPlatform _instance =
-      MethodChannelVideoPlayer() as VideoPlayerPlatform;
+  static VideoPlayerPlatform _instance = MethodChannelVideoPlayer() as VideoPlayerPlatform;
 
   /// The default instance of [VideoPlayerPlatform] to use.
   ///
@@ -48,8 +47,7 @@ abstract class VideoPlayerPlatform {
       try {
         instance._verifyProvidesDefaultImplementations();
       } catch (_) {
-        throw AssertionError(
-            'Platform interfaces must not be implemented with `implements`');
+        throw AssertionError('Platform interfaces must not be implemented with `implements`');
       }
     }
     _instance = instance;
@@ -69,8 +67,7 @@ abstract class VideoPlayerPlatform {
   }
 
   /// Creates an instance of a video player and returns its textureId.
-  Future<int?> create(
-      {BetterPlayerBufferingConfiguration? bufferingConfiguration}) {
+  Future<int?> create({BetterPlayerBufferingConfiguration? bufferingConfiguration}) {
     throw UnimplementedError('create() has not been implemented.');
   }
 
@@ -120,14 +117,12 @@ abstract class VideoPlayerPlatform {
   }
 
   /// Sets the video track parameters (used to select quality of the video)
-  Future<void> setTrackParameters(
-      int? textureId, int? width, int? height, int? bitrate) {
+  Future<void> setTrackParameters(int? textureId, int? width, int? height, int? bitrate) {
     throw UnimplementedError('setTrackParameters() has not been implemented.');
   }
 
   /// Sets the video track constraint
-  Future<void> setTrackConstraint(
-      int? textureId, int? width, int? height, int? bitrate) {
+  Future<void> setTrackConstraint(int? textureId, int? width, int? height, int? bitrate) {
     throw UnimplementedError('setTrackConstraint() has not been implemented.');
   }
 
@@ -147,21 +142,17 @@ abstract class VideoPlayerPlatform {
   }
 
   ///Enables PiP mode.
-  Future<void> enablePictureInPicture(int? textureId, double? top, double? left,
-      double? width, double? height) {
-    throw UnimplementedError(
-        'enablePictureInPicture() has not been implemented.');
+  Future<void> enablePictureInPicture(int? textureId, double? top, double? left, double? width, double? height) {
+    throw UnimplementedError('enablePictureInPicture() has not been implemented.');
   }
 
   ///Disables PiP mode.
   Future<void> disablePictureInPicture(int? textureId) {
-    throw UnimplementedError(
-        'disablePictureInPicture() has not been implemented.');
+    throw UnimplementedError('disablePictureInPicture() has not been implemented.');
   }
 
   Future<bool?> isPictureInPictureEnabled(int? textureId) {
-    throw UnimplementedError(
-        'isPictureInPictureEnabled() has not been implemented.');
+    throw UnimplementedError('isPictureInPictureEnabled() has not been implemented.');
   }
 
   Future<void> setAudioTrack(int? textureId, String? name, int? index) {
@@ -193,12 +184,6 @@ abstract class VideoPlayerPlatform {
 /// Description of the data source used to create an instance of
 /// the video player.
 class DataSource {
-  /// The maximum cache size to keep on disk in bytes.
-  static const int _maxCacheSize = 100 * 1024 * 1024;
-
-  /// The maximum size of each individual file in bytes.
-  static const int _maxCacheFileSize = 10 * 1024 * 1024;
-
   /// Constructs an instance of [DataSource].
   ///
   /// The [sourceType] is always required.
@@ -213,32 +198,40 @@ class DataSource {
   /// The [package] argument must be non-null when the asset comes from a
   /// package and null otherwise.
   ///
-  DataSource(
-      {required this.sourceType,
-      this.uri,
-      this.formatHint,
-      this.asset,
-      this.package,
-      this.headers,
-      this.useCache = false,
-      this.maxCacheSize = _maxCacheSize,
-      this.maxCacheFileSize = _maxCacheFileSize,
-      this.cacheKey,
-      this.showNotification = false,
-      this.title,
-      this.author,
-      this.imageUrl,
-      this.notificationChannelName,
-      this.overriddenDuration,
-      this.licenseUrl,
-      this.certificateUrl,
-      this.drmHeaders,
-      this.activityName,
-      this.clearKey,
-      this.videoExtension,
-      this.sig,
-      this.videoConstraint})
-      : assert(uri == null || asset == null);
+  DataSource({
+    required this.sourceType,
+    this.uri,
+    this.formatHint,
+    this.asset,
+    this.package,
+    this.headers,
+    this.useCache = false,
+    this.maxCacheSize = _maxCacheSize,
+    this.maxCacheFileSize = _maxCacheFileSize,
+    this.cacheKey,
+    this.showNotification = false,
+    this.title,
+    this.author,
+    this.imageUrl,
+    this.notificationChannelName,
+    this.overriddenDuration,
+    this.licenseUrl,
+    this.certificateUrl,
+    this.drmHeaders,
+    this.activityName,
+    this.clearKey,
+    this.videoExtension,
+    this.sig,
+    this.videoConstraint,
+  })
+    // ignore: prefer_asserts_with_message
+    : assert(uri == null || asset == null);
+
+  /// The maximum cache size to keep on disk in bytes.
+  static const int _maxCacheSize = 100 * 1024 * 1024;
+
+  /// The maximum size of each individual file in bytes.
+  static const int _maxCacheFileSize = 10 * 1024 * 1024;
 
   /// Describes the type of data source this [VideoPlayerController]
   /// is constructed with.
@@ -385,16 +378,17 @@ class VideoEvent {
   ///
   /// Depending on the [eventType], the [duration], [size] and [buffered]
   /// arguments can be null.
-  VideoEvent(
-      {required this.eventType,
-      required this.key,
-      this.duration,
-      this.size,
-      this.buffered,
-      this.position,
-      this.metadata,
-      this.tracks,
-      this.isPlaying});
+  const VideoEvent({
+    required this.eventType,
+    required this.key,
+    this.duration,
+    this.size,
+    this.buffered,
+    this.position,
+    this.metadata,
+    this.tracks,
+    this.isPlaying,
+  });
 
   /// The type of the event.
   final VideoEventType eventType;
@@ -433,19 +427,18 @@ class VideoEvent {
   final Map<dynamic, dynamic>? metadata; // <String, dynamic>
 
   @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is VideoEvent &&
-            runtimeType == other.runtimeType &&
-            key == other.key &&
-            eventType == other.eventType &&
-            duration == other.duration &&
-            size == other.size &&
-            isPlaying == other.isPlaying &&
-            mapEquals(metadata, other.metadata) &&
-            listEquals(buffered, other.buffered) &&
-            listEquals(tracks, other.tracks);
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoEvent &&
+          runtimeType == other.runtimeType &&
+          key == other.key &&
+          eventType == other.eventType &&
+          duration == other.duration &&
+          size == other.size &&
+          isPlaying == other.isPlaying &&
+          mapEquals(metadata, other.metadata) &&
+          listEquals(buffered, other.buffered) &&
+          listEquals(tracks, other.tracks);
 
   @override
   int get hashCode =>
@@ -538,9 +531,7 @@ class DurationRange extends Equatable {
   /// For example, assume that the entire video is 4 minutes long. If [start] has
   /// a duration of one minute, this will return `0.25` since the DurationRange
   /// starts 25% of the way through the video's total length.
-  double startFraction(Duration duration) {
-    return start.inMilliseconds / duration.inMilliseconds;
-  }
+  double startFraction(Duration duration) => start.inMilliseconds / duration.inMilliseconds;
 
   /// Assumes that [duration] is the total length of the video that this
   /// DurationRange is a segment form. It returns the percentage that [start] is
@@ -549,9 +540,7 @@ class DurationRange extends Equatable {
   /// For example, assume that the entire video is 4 minutes long. If [end] has a
   /// duration of two minutes, this will return `0.5` since the DurationRange
   /// ends 50% of the way through the video's total length.
-  double endFraction(Duration duration) {
-    return end.inMilliseconds / duration.inMilliseconds;
-  }
+  double endFraction(Duration duration) => end.inMilliseconds / duration.inMilliseconds;
 
   @override
   String toString() => 'DurationRange(start: $start, end: $end)';
