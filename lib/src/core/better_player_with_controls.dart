@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
-import 'package:xstream_player/xstream_player.dart';
+
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter/material.dart';
 import 'package:xstream_player/src/configuration/better_player_controller_event.dart';
 import 'package:xstream_player/src/controls/better_player_cupertino_controls.dart';
 import 'package:xstream_player/src/controls/better_player_material_controls.dart';
 import 'package:xstream_player/src/core/better_player_utils.dart';
 import 'package:xstream_player/src/subtitles/better_player_subtitles_drawer.dart';
 import 'package:xstream_player/src/video_player/video_player.dart';
-import 'package:flutter/material.dart';
+import 'package:xstream_player/xstream_player.dart';
 
 class BetterPlayerWithControls extends StatefulWidget {
   const BetterPlayerWithControls({super.key, this.controller});
@@ -204,6 +205,14 @@ class _BetterPlayerVideoFitWidgetState extends State<_BetterPlayerVideoFitWidget
 
   StreamSubscription<BetterPlayerControllerEvent>? _controllerEventSubscription;
 
+  // On web, we use a key to force VideoPlayer to recreate its HtmlElementView
+  // after exiting fullscreen. When fullscreen opens, a second HtmlElementView
+  // is created with the same viewType, which moves the <video> DOM element to
+  // the fullscreen slot. When fullscreen closes, the element is detached from
+  // the DOM. Changing this key disposes the stale HtmlElementView and creates
+  // a fresh one, re-embedding the <video> element back into the normal slot.
+  Key _playerKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -258,6 +267,13 @@ class _BetterPlayerVideoFitWidgetState extends State<_BetterPlayerVideoFitWidget
           _started = false;
         });
       }
+      // On web, force VideoPlayer to recreate its HtmlElementView after
+      // returning from fullscreen so the <video> element is re-embedded.
+      if (kIsWeb && event == BetterPlayerControllerEvent.hideFullscreen) {
+        setState(() {
+          _playerKey = UniqueKey();
+        });
+      }
     });
   }
 
@@ -267,7 +283,7 @@ class _BetterPlayerVideoFitWidgetState extends State<_BetterPlayerVideoFitWidget
       // iOS platform views (UiKitView) don't play well with Clip/Transform/FittedBox.
       // Render the platform view directly to avoid black screen.
       if (defaultTargetPlatform == TargetPlatform.iOS) {
-        return SizedBox.expand(child: VideoPlayer(controller));
+        return SizedBox.expand(child: VideoPlayer(controller, key: _playerKey));
       }
       return Center(
         child: ClipRect(
@@ -277,7 +293,7 @@ class _BetterPlayerVideoFitWidgetState extends State<_BetterPlayerVideoFitWidget
               child: SizedBox(
                 width: max(1, controller!.value.size?.width ?? 1.0),
                 height: max(1, controller!.value.size?.height ?? 1.0),
-                child: VideoPlayer(controller),
+                child: VideoPlayer(controller, key: _playerKey),
               ),
             ),
           ),
