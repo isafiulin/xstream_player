@@ -235,16 +235,15 @@ class _WebPlayerState {
     _videoElement.onEnded.listen((_) =>
         _emit(VideoEvent(eventType: VideoEventType.completed, key: _currentKey)));
 
+    // Emit isPlayingChanged only — do NOT emit VideoEventType.play/pause back
+    // to the controller, because that would cause an infinite loop:
+    //   platform.play() → onPlay → emit play → controller.play() → platform.play() → …
     _videoElement.onPlay.listen((_) {
-      _eventController
-        ..add(VideoEvent(eventType: VideoEventType.isPlayingChanged, key: _currentKey, isPlaying: true))
-        ..add(VideoEvent(eventType: VideoEventType.play, key: _currentKey, isPlaying: true));
+      _emit(VideoEvent(eventType: VideoEventType.isPlayingChanged, key: _currentKey, isPlaying: true));
     });
 
     _videoElement.onPause.listen((_) {
-      _eventController
-        ..add(VideoEvent(eventType: VideoEventType.isPlayingChanged, key: _currentKey, isPlaying: false))
-        ..add(VideoEvent(eventType: VideoEventType.pause, key: _currentKey, isPlaying: false));
+      _emit(VideoEvent(eventType: VideoEventType.isPlayingChanged, key: _currentKey, isPlaying: false));
     });
 
     _videoElement.onWaiting.listen((_) =>
@@ -265,11 +264,13 @@ class _WebPlayerState {
       _emit(VideoEvent(eventType: VideoEventType.bufferingUpdate, key: _currentKey, buffered: ranges));
     });
 
-    _videoElement.onSeeked.listen((_) => _emit(VideoEvent(
-          eventType: VideoEventType.seek,
-          key: _currentKey,
-          position: Duration(milliseconds: (_videoElement.currentTime * 1000).round()),
-        )));
+    // NOTE: We intentionally do NOT forward onSeeked as VideoEventType.seek.
+    // The controller (video_player.dart) handles seek events by calling seekTo()
+    // again, which would create an infinite feedback loop on web:
+    //   controller.seekTo() → currentTime = X → onseeked → emit seek →
+    //   controller.seekTo(X) → currentTime = X → onseeked → …
+    // On native, seek events come from external sources (media session / notifications)
+    // and this feedback is intentional. On web we control seeking directly.
 
     // Video element errors (also catches hls.js fatal errors via MSE)
     _videoElement.onError.listen((_) =>
