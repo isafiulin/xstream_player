@@ -4,9 +4,11 @@
 
 // Dart imports:
 import 'dart:async';
-import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:xstream_player/src/io/cross_file.dart';
+import 'package:xstream_player/src/video_player/platform_create.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:xstream_player/src/configuration/better_player_buffering_configuration.dart';
@@ -14,10 +16,16 @@ import 'package:xstream_player/src/configuration/better_player_track.dart';
 import 'package:xstream_player/src/core/better_player_utils.dart';
 import 'package:xstream_player/src/video_player/video_player_platform_interface.dart';
 
-final VideoPlayerPlatform _videoPlayerPlatform = VideoPlayerPlatform.instance
-  // This will clear all open videos on the platform when a full restart is
-  // performed.
-  ..init();
+// Select the correct platform implementation (web or native) and initialise it.
+// This overrides the default MethodChannelVideoPlayer with WebVideoPlayer on web.
+final VideoPlayerPlatform _videoPlayerPlatform = _initPlatform();
+
+VideoPlayerPlatform _initPlatform() {
+  final impl = createVideoPlayerPlatform();
+  VideoPlayerPlatform.instance = impl;
+  impl.init();
+  return impl;
+}
 
 /// The duration, current position, buffering state, error state and settings
 /// of a [VideoPlayerController].
@@ -379,6 +387,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   ///
   /// This will load the file from the file-URI given by:
   /// `'file://${file.path}'`.
+  ///
+  /// Not supported on web.
   Future<void> setFileDataSource(
     File file, {
     bool? showNotification,
@@ -389,20 +399,25 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     Duration? overriddenDuration,
     String? activityName,
     String? clearKey,
-  }) => _setDataSource(
-    DataSource(
-      sourceType: DataSourceType.file,
-      uri: 'file://${file.path}',
-      showNotification: showNotification,
-      title: title,
-      author: author,
-      imageUrl: imageUrl,
-      notificationChannelName: notificationChannelName,
-      overriddenDuration: overriddenDuration,
-      activityName: activityName,
-      clearKey: clearKey,
-    ),
-  );
+  }) {
+    if (kIsWeb) {
+      return Future.error(UnsupportedError('setFileDataSource() is not supported on web.'));
+    }
+    return _setDataSource(
+      DataSource(
+        sourceType: DataSourceType.file,
+        uri: 'file://${file.path}',
+        showNotification: showNotification,
+        title: title,
+        author: author,
+        imageUrl: imageUrl,
+        notificationChannelName: notificationChannelName,
+        overriddenDuration: overriddenDuration,
+        activityName: activityName,
+        clearKey: clearKey,
+      ),
+    );
+  }
 
   Future<void> _setDataSource(DataSource dataSourceDescription) async {
     if (_isDisposed) {

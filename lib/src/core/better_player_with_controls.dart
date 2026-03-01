@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:xstream_player/xstream_player.dart';
 import 'package:xstream_player/src/configuration/better_player_controller_event.dart';
 import 'package:xstream_player/src/controls/better_player_cupertino_controls.dart';
@@ -144,7 +144,7 @@ class _BetterPlayerWithControlsState extends State<BetterPlayerWithControls> {
     if (controlsConfiguration.showControls) {
       BetterPlayerTheme? playerTheme = controlsConfiguration.playerTheme;
       if (playerTheme == null) {
-        if (Platform.isAndroid) {
+        if (defaultTargetPlatform == TargetPlatform.android) {
           playerTheme = BetterPlayerTheme.material;
         } else {
           playerTheme = BetterPlayerTheme.cupertino;
@@ -266,7 +266,7 @@ class _BetterPlayerVideoFitWidgetState extends State<_BetterPlayerVideoFitWidget
     if (_initialized && _started) {
       // iOS platform views (UiKitView) don't play well with Clip/Transform/FittedBox.
       // Render the platform view directly to avoid black screen.
-      if (Platform.isIOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         return SizedBox.expand(child: VideoPlayer(controller));
       }
       return Center(

@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:xstream_player/src/core/better_player_utils.dart';
+import 'package:xstream_player/src/io/cross_file.dart';
 import 'package:xstream_player/src/subtitles/better_player_subtitle.dart';
 import 'package:xstream_player/xstream_player.dart';
 
@@ -43,22 +42,14 @@ class BetterPlayerSubtitlesFactory {
 
   static Future<List<BetterPlayerSubtitle>> _parseSubtitlesFromNetwork(BetterPlayerSubtitlesSource source) async {
     try {
-      final client = HttpClient();
       final List<BetterPlayerSubtitle> subtitles = [];
+      final resolvedHeaders = source.headers ?? const <String, String>{};
+
       for (final String? url in source.urls!) {
-        final request = await client.getUrl(Uri.parse(url!));
-        source.headers?.keys.forEach((key) {
-          final value = source.headers![key];
-          if (value != null) {
-            request.headers.add(key, value);
-          }
-        });
-        final response = await request.close();
-        final data = await response.transform(const Utf8Decoder()).join();
-        final cacheList = _parseString(data);
+        final response = await http.get(Uri.parse(url!), headers: resolvedHeaders);
+        final cacheList = _parseString(response.body);
         subtitles.addAll(cacheList);
       }
-      client.close();
 
       BetterPlayerUtils.log('Parsed total subtitles: ${subtitles.length}');
       return subtitles;

@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:xstream_player/xstream_player.dart';
 import 'package:xstream_player/src/controls/better_player_clickable_widget.dart';
 import 'package:xstream_player/src/core/better_player_utils.dart';
@@ -382,7 +382,9 @@ abstract class BetterPlayerControlsState<T extends StatefulWidget> extends State
   );
 
   void _showModalBottomSheet(List<Widget> children) {
-    Platform.isAndroid ? _showMaterialBottomSheet(children) : _showCupertinoModalBottomSheet(children);
+    defaultTargetPlatform == TargetPlatform.android
+        ? _showMaterialBottomSheet(children)
+        : _showCupertinoModalBottomSheet(children);
   }
 
   void _showCupertinoModalBottomSheet(List<Widget> children) {

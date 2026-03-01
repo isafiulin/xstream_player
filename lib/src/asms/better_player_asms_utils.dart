@@ -1,6 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:xstream_player/src/asms/better_player_asms_data_holder.dart';
 import 'package:xstream_player/src/clearkey/better_player_clearkey_utils.dart';
 import 'package:xstream_player/src/core/better_player_utils.dart';
@@ -12,8 +10,6 @@ class BetterPlayerAsmsUtils {
 
   static const String _hlsExtension = 'm3u8';
   static const String _dashExtension = 'mpd';
-
-  static final HttpClient _httpClient = HttpClient()..connectionTimeout = const Duration(seconds: 5);
 
   ///Check if given url is HLS / DASH-type data source.
   static bool isDataSourceAsms(String url) => isDataSourceHls(url) || isDataSourceDash(url);
@@ -36,20 +32,22 @@ class BetterPlayerAsmsUtils {
       if (sig != null) {
         final lastSegment = uri.pathSegments.last;
         final computedSig = BetterPlayerClearKeyUtils.computeHmacSha256Base64(sig, lastSegment);
-        uri = uri.replace(queryParameters: {"sig": computedSig});
-      }
-      final request = await _httpClient.getUrl(uri);
-      if (headers != null) {
-        headers.forEach((name, value) => request.headers.add(name, value!));
+        uri = uri.replace(queryParameters: {'sig': computedSig});
       }
 
-      final response = await request.close();
-      var data = '';
-      await response.transform(const Utf8Decoder()).listen((content) {
-        data += content;
-      }).asFuture<String?>();
+      final resolvedHeaders = headers != null
+          ? Map.fromEntries(
+              headers.entries
+                  .where((e) => e.value != null)
+                  .map((e) => MapEntry(e.key, e.value!)),
+            )
+          : const <String, String>{};
 
-      return data;
+      final response = await http
+          .get(uri, headers: resolvedHeaders)
+          .timeout(const Duration(seconds: 30));
+
+      return response.body;
     } on Exception catch (exception) {
       BetterPlayerUtils.log('GetDataFromUrl failed: $exception');
       return null;

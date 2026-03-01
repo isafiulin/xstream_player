@@ -1,11 +1,13 @@
 // ignore_for_file: flutter_style_todos
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:xstream_player/src/io/cross_file.dart';
+import 'package:xstream_player/src/io/web_blob.dart';
 import 'package:xstream_player/src/configuration/better_player_controller_event.dart';
 import 'package:xstream_player/src/core/better_player_utils.dart';
 import 'package:xstream_player/src/subtitles/better_player_subtitle.dart';
@@ -47,6 +49,9 @@ class BetterPlayerController {
 
   ///List of files to delete once player disposes.
   final List<File> _tempFiles = [];
+
+  ///List of blob URLs to revoke once player disposes (web only).
+  final List<String> _tempBlobUrls = [];
 
   ///Stream controller which emits stream when player events happen.
   final StreamController<Map<dynamic, dynamic>> _controllerAnalytics = StreamController.broadcast();
@@ -475,6 +480,10 @@ class BetterPlayerController {
         );
 
       case BetterPlayerDataSourceType.file:
+        if (kIsWeb) {
+          BetterPlayerUtils.log('File data source is not supported on web. Skipping.');
+          break;
+        }
         final file = File(betterPlayerDataSource.url);
         if (!file.existsSync()) {
           BetterPlayerUtils.log(
@@ -496,6 +505,17 @@ class BetterPlayerController {
           clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey,
         );
       case BetterPlayerDataSourceType.memory:
+        if (kIsWeb) {
+          final extension = _betterPlayerDataSource!.videoExtension ?? 'mp4';
+          final mimeType = 'video/$extension';
+          final blobUrl = createBlobUrl(_betterPlayerDataSource!.bytes!, mimeType: mimeType);
+          if (blobUrl == null) {
+            throw ArgumentError("Couldn't create blob URL from memory bytes.");
+          }
+          _tempBlobUrls.add(blobUrl);
+          await videoPlayerController?.setNetworkDataSource(blobUrl);
+          break;
+        }
         final file = await _createFile(
           _betterPlayerDataSource!.bytes!,
           extension: _betterPlayerDataSource!.videoExtension,
@@ -942,7 +962,7 @@ class BetterPlayerController {
         },
       ),
     );
-    if (Platform.isIOS) {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
       videoPlayerController!.setAudioTrack(track.label, track.groupIndex ?? 0);
     } else {
       videoPlayerController!.setAudioTrack(track.groupId, track.groupIndex);
@@ -1097,14 +1117,14 @@ class BetterPlayerController {
       _wasInFullScreenBeforePiP = _isFullScreen;
       _wasControlsEnabledBeforePiP = _controlsEnabled;
       setControlsEnabled(false);
-      if (Platform.isAndroid) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
         _wasInFullScreenBeforePiP = _isFullScreen;
         await videoPlayerController?.enablePictureInPicture(left: 0, top: 0, width: 0, height: 0);
         enterFullScreen();
         _postEvent(BetterPlayerEvent(BetterPlayerEventType.pipStart));
         return;
       }
-      if (Platform.isIOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         final RenderBox? renderBox = betterPlayerGlobalKey.currentContext!.findRenderObject() as RenderBox?;
         if (renderBox == null) {
           BetterPlayerUtils.log(
@@ -1329,8 +1349,10 @@ class BetterPlayerController {
 
       ///Delete files async
       for (final file in _tempFiles) {
-        file.delete();
+        file.delete(); // ignore: unawaited_futures
       }
+      ///Revoke blob URLs on web
+      _tempBlobUrls.forEach(revokeBlobUrl);
     }
   }
 }

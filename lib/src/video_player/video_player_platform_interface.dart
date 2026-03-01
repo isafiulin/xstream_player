@@ -37,7 +37,8 @@ abstract class VideoPlayerPlatform {
   /// platform-specific class that extends [VideoPlayerPlatform] when they
   /// register themselves.
   ///
-  /// Defaults to [MethodChannelVideoPlayer].
+  /// Defaults to [MethodChannelVideoPlayer] on native platforms.
+  /// On web, [WebVideoPlayer] is set as the instance automatically.
   static VideoPlayerPlatform get instance => _instance;
 
   // TODO(amirh): Extract common platform interface logic.
@@ -52,6 +53,7 @@ abstract class VideoPlayerPlatform {
     }
     _instance = instance;
   }
+
 
   /// Initializes the platform interface and disposes all existing players.
   ///
